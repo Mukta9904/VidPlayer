@@ -23,4 +23,8 @@ const uploadOnCludinary = async function(localFilePath) {
     }
 }
 
-export {uploadOnCludinary}
+const deleteFromcloudinary = async function(imageURL) {
+    const publicId = (imageURL) => imageURL.split('/').pop().split('.')[0];
+   await cloudinary.uploader.destroy(publicId(imageURL));
+}
+export {uploadOnCludinary, deleteFromcloudinary}

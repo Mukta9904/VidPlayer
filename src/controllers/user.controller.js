@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCludinary } from "../utils/cloudinary.js";
+import { deleteFromcloudinary, uploadOnCludinary } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose";
 
@@ -129,8 +129,9 @@ const logoutUser = asyncHandler( async (req, res)=>{
    // clear the cookies
    // delete the refreshToken
    await User.findByIdAndUpdate(req.user._id,{
-      $set: { refreshToken: undefined }
-   },{ new : true}
+      // $set: { refreshToken: undefined }
+      $unset: { refreshToken: 1 }  // it removes the field 
+    },{ new : true}
 );
 
 const options = {
@@ -220,6 +221,9 @@ const updateAccountDetails = asyncHandler( async (req, res)=>{
 })
 
 const updateUserAvatar = asyncHandler( async (req, res)=>{
+   const previousImagePath = req.user?.avatar;
+   if(previousImagePath !== "") {await deleteFromcloudinary(previousImagePath)}
+
    const avatarLocalPath = req.file?.path;
    if(!avatarLocalPath) throw new ApiError(400 , "Avatar is required");
 
@@ -235,6 +239,9 @@ const updateUserAvatar = asyncHandler( async (req, res)=>{
 })
 
 const updateUserCoverImage = asyncHandler( async (req, res)=>{
+   const previousImagePath = req.user?.coverImage;
+   if(previousImagePath !== "") {await deleteFromcloudinary(previousImagePath)}
+
    const coverImageLocalPath = req.file?.path;
    if(!coverImageLocalPath) throw new ApiError(400 , "Cover Image is required");
 
@@ -253,7 +260,7 @@ const getUserChannelProfile = asyncHandler( async (req, res)=>{
     const {username} = req.params;
     if(!username?.trim()) throw new ApiError(400 , "Username is missing");
 
-    const channel = User.aggregate([
+    const channel = await User.aggregate([
       // stage 1 :-> finding the channel from all the users
       {  
          $match: { username: username?.toLowerCase() }
@@ -262,13 +269,15 @@ const getUserChannelProfile = asyncHandler( async (req, res)=>{
       {
          $lookup: {
                from: "subscriptions",
-               locaField: "_id",
+               localField: "_id",
                foreignField: "channel",
                as: "subscribers"
-            },
+            }
+      },
+      {
             $lookup: {
                from: "subscriptions",
-               locaField: "_id",
+               localField: "_id",
                foreignField: "subscriber",
                as: "subscribedTo"
             },   
@@ -314,52 +323,53 @@ const getUserChannelProfile = asyncHandler( async (req, res)=>{
 
 const getUserWatchHistory = asyncHandler( async(req, res)=>{
    
-   const user =  User.aggregate([
-       // stage 1: -> get the user
-       {
-         $match: {
-            _id: new mongoose.Types.ObjectId(req.user?._id)
-         }
-       },
-      // stage 2: -> get the vedios which are in watchHistory of users collection
+   const user = await User.aggregate([
+      // stage 1: -> get the user
       {
-         $lookup: {
-            from: "users",
-            localField: "watchHistory",
-            foreignField: "_id",
-            as:"watchHistory",
-           // 1sub-stage: -> Get the ownew details from the users collection
-            pipeline: [
-               {
-               $lookup: {
-                  from: "videos",
-                  localField: "owner",
-                  foreignField: "_id",
-                  as:"owner",
-                 // 2sub-stage: -> Get the required fields of owner from users collection 
-                  pipeline: [
-                     {
-                       $project: {
-                          fullName: 1,
-                          username: 1,
-                          avatar: 1
-                        }
-                     }
-                  ]
-               }
-            },
-            // We should only provide the object as a data instead of the array of object . So overriden the array owner to an object owner.
-            {
-              $addFields: {
-               owner: {
-                  $first: "$owner"
-               }
-              }
-            }
-           ]
-         }
+          $match: {
+              _id: new mongoose.Types.ObjectId(req.user?._id)
+          }
       },
-   ])
+      // stage 2: -> get the videos which are in watchHistory of users collection
+      {
+          $lookup: {
+              from: "videos", 
+              localField: "watchHistory",
+              foreignField: "_id",
+              as: "watchHistory",
+              // 1sub-stage: -> Get the owner details from the users collection
+              pipeline: [
+                  {
+                      $lookup: {
+                          from: "users",
+                          localField: "owner",
+                          foreignField: "_id",
+                          as: "owner",
+                          // 2sub-stage: -> Get the required fields of owner from users collection 
+                          pipeline: [
+                              {
+                                  $project: {
+                                      fullName: 1,
+                                      username: 1,
+                                      avatar: 1
+                                  }
+                              }
+                          ]
+                      }
+                  },
+                  // We should only provide the object as a data instead of the array of object. So override the array owner to an object owner.
+                  {
+                      $addFields: {
+                          owner: {
+                              $first: "$owner"
+                          }
+                      }
+                  }
+              ]
+          }
+      }
+  ]);
+  
   console.log(user);
    if(!user) throw new ApiError( 404, "User not found")
       
