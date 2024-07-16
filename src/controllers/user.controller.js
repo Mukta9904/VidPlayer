@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
-import { deleteFromcloudinary, uploadOnCludinary } from "../utils/cloudinary.js";
+import { deleteFromCloudinary, uploadOnCludinary } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose";
 
@@ -222,7 +222,7 @@ const updateAccountDetails = asyncHandler( async (req, res)=>{
 
 const updateUserAvatar = asyncHandler( async (req, res)=>{
    const previousImagePath = req.user?.avatar;
-   if(previousImagePath !== "") {await deleteFromcloudinary(previousImagePath)}
+   if(previousImagePath !== "") {await deleteFromCloudinary(previousImagePath)}
 
    const avatarLocalPath = req.file?.path;
    if(!avatarLocalPath) throw new ApiError(400 , "Avatar is required");
@@ -240,7 +240,7 @@ const updateUserAvatar = asyncHandler( async (req, res)=>{
 
 const updateUserCoverImage = asyncHandler( async (req, res)=>{
    const previousImagePath = req.user?.coverImage;
-   if(previousImagePath !== "") {await deleteFromcloudinary(previousImagePath)}
+   if(previousImagePath !== "") {await deleteFromCloudinary(previousImagePath)}
 
    const coverImageLocalPath = req.file?.path;
    if(!coverImageLocalPath) throw new ApiError(400 , "Cover Image is required");
