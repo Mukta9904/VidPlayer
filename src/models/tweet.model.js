@@ -12,4 +12,4 @@ const tweetsSchema = new Schema({
     },
 },{timestamps :true})
 
-export const Tweets = mongoose.model("Tweets", tweetsSchema)
+export const Tweet = mongoose.model("Tweet", tweetsSchema)
