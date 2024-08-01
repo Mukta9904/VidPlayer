@@ -106,10 +106,10 @@ const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: get video by id
     if(!videoId) throw new ApiError(500, "Video Id is missing");
-    console.log(videoId);
     const video = await Video.findById(videoId);
-    
-    return res.status(200).json(new ApiResponse(200, video, "Video Successfully fetched"))
+    video.views = video.views + 1;
+    await video.save({ validateBeforeSave: false });
+    return res.status(200).json(new ApiResponse(200, video, "Video Successfully fetched"));
 })
 
 const updateVideo = asyncHandler(async (req, res) => {
