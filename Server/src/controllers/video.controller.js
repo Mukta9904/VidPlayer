@@ -6,6 +6,7 @@ import {
     deleteFromCloudinary,
     uploadOnCludinary,
 } from "../utils/cloudinary.js";
+import { User } from "../models/user.model.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const {
@@ -123,6 +124,15 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
+    if(req.user?._id){
+        const user = await User.findOne({_id: req.user?._id});
+        if(user){
+            console.log(user.watchHistory);
+            if(!user.watchHistory.includes(videoId)) user.watchHistory?.push(videoId);
+            await user.save({validateBeforeSave: false});
+        }
+    }
+    
     //TODO: get video by id
     if (!videoId) throw new ApiError(500, "Video Id is missing");
     const video = await Video.findById(videoId);
