@@ -1,11 +1,14 @@
 import { ThemeToggle } from "@/components/theme-toggle";
+import Homepage from "./homepage/page";
+import { NextUIProvider } from "@nextui-org/react";
 
 export default function Home() {
   return (
     <>
-    
-    <div className="absolute top-2 right-2">
-    <ThemeToggle/>
+    <div >
+      <NextUIProvider>
+      <Homepage/>
+      </NextUIProvider>
     </div>
     </>
   );

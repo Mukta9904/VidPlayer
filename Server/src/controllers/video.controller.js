@@ -5,6 +5,7 @@ import { Video } from "../models/video.model.js";
 import {
     deleteFromCloudinary,
     uploadOnCludinary,
+    uploadVideoOnCludinary,
 } from "../utils/cloudinary.js";
 import { User } from "../models/user.model.js";
 
@@ -89,7 +90,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Video or thumbnail is missing.");
     }
 
-    const videoFile = await uploadOnCludinary(videoLocalPath);
+    const videoFile = await uploadVideoOnCludinary(videoLocalPath);
     const thumbnail = await uploadOnCludinary(thumbnailLocalPath);
 
     if (!videoFile || !thumbnail) {
