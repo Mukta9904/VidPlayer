@@ -8,7 +8,16 @@ import {Card, CardBody, CardFooter, Image} from "@nextui-org/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-
+import { userContext } from '@/context/context'
+interface User {
+  fullName: string,
+  avatar: string,
+  username: string,
+  _id: string,
+  watchHistory?: string[],
+  email: string,
+  coverImage?: string
+}
 interface Owner{
   fullname: string,
   avatar: string,
@@ -58,17 +67,20 @@ function convertSecondsToHMS(seconds: number): string {
 }
 
 const Homepage = () => {
+  
   dayjs.extend(relativeTime);
   const [video , setVideo] = useState<Video[]>([])
   useEffect( () => {
   const getData = async () =>{
-    const res = await axios.get("http://localhost:8000/api/v1/videos/");
-    setVideo(res.data.data);
+    const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/videos`);
+    if(res.data.success)  setVideo(res.data.data);
   }   
   getData()
   }, [])
+  const [user, setUser] = useState<User | null>(null);
   
   return (
+    <userContext.Provider value={{ user, setUser }}>
     <div>
       <div className=' w-full h-20 backdrop-blur-md  border-b-[2px] border-gray-700'>
         <Navbar/>
@@ -115,6 +127,7 @@ const Homepage = () => {
         </div>
       </div>
     </div>
+    </userContext.Provider>
   )
 }
 
