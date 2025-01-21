@@ -2,12 +2,15 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Video } from "../models/video.model.js";
+import { getVideoDurationInSeconds} from "get-video-duration";
 import {
     deleteFromCloudinary,
     uploadOnCludinary,
     uploadVideoOnCludinary,
 } from "../utils/cloudinary.js";
 import { User } from "../models/user.model.js";
+import axios from "axios";
+import path from "path";
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const {
@@ -90,10 +93,24 @@ const publishAVideo = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Video or thumbnail is missing.");
     }
 
-    const videoFile = await uploadVideoOnCludinary(videoLocalPath);
+    // const videoFile = await uploadVideoOnCludinary(videoLocalPath);
+    const uploadPath = path.resolve(videoLocalPath);
+
+    if(!uploadPath) throw new ApiError(500, "Something went wrong while uploading the video");
+    // Upload the video into uploader
+    const uploaderResponse = await axios.post(`${process.env.UPLOAD_SERVER_URI}`, {
+        videoPath: uploadPath});
+    if(!uploaderResponse) throw new ApiError(500, "Something went wrong while uploading the video");
+
+    const {lessonId} = uploaderResponse.data; 
+
+    if(!lessonId) throw new ApiError(500, "Something went wrong while uploading the video no job started");
+    
+    const duration = await getVideoDurationInSeconds(videoLocalPath);
+
     const thumbnail = await uploadOnCludinary(thumbnailLocalPath);
 
-    if (!videoFile || !thumbnail) {
+    if ( !thumbnail) {
         throw new ApiError(
             500,
             "Something went wrong while uploading on Cloudinary"
@@ -101,13 +118,14 @@ const publishAVideo = asyncHandler(async (req, res) => {
     }
 
     const uploadedVideo = await Video.create({
-        videoFile: videoFile.url,
+        videoFile: lessonId,
         thumbNail: thumbnail.url,
         title,
         description: description || "",
-        duration: videoFile.duration,
-        isPublished: true,
+        duration: duration || 0,
+        isPublished: false,
         owner: userId,
+        status: "pending",
     });
 
     if (!uploadedVideo)
@@ -118,7 +136,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
             new ApiResponse(
                 200,
                 uploadedVideo,
-                "Video Uploaded and Published Successfully"
+                "Video uploading started successfully"
             )
         );
 });

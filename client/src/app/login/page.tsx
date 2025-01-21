@@ -21,7 +21,7 @@ const schema = yup.object().shape({
 });
 
 const LoginForm: React.FC = () => {
-  const { setUser, setToken } = useContext(userContext);
+  // const { setUser } = useContext(userContext);
   const router = useRouter();
   const {
     register,
@@ -49,16 +49,15 @@ const LoginForm: React.FC = () => {
 
       if (res.data.statusCode === 200) {
         const data = res.data.data;
-        setUser({
-          fullName: data.fullName,
-          avatar: data.avatar,
-          username: data.username,
-          _id: data._id,
-          watchHistory: data.watchHistory,
-          email: data.email,
-          coverImage: data.coverImage,
-        });
-        console.log(data);
+        // setUser({
+        //   fullName: data.fullName,
+        //   avatar: data.avatar,
+        //   username: data.username,
+        //   _id: data._id,
+        //   watchHistory: data.watchHistory,
+        //   email: data.email,
+        //   coverImage: data.coverImage,
+        // });
         localStorage.setItem("token", data.accessToken);
         router.push("/homepage");
       }

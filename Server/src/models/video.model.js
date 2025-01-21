@@ -1,3 +1,4 @@
+import e from "express";
 import mongoose, { Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
@@ -16,11 +17,11 @@ const videoSchema = new Schema({
     },
     description:{
         type: String,
-        required: true,
+        
     },
     duration:{
         type: Number,
-        required: true,
+        
     },
     views:{
         type: Number,
@@ -28,11 +29,16 @@ const videoSchema = new Schema({
     },
     isPublished:{
         type: Boolean,
-        default: true
+        default: false
     },
     owner: {
         type: Schema.Types.ObjectId,
         ref: "User"
+    },
+    uploadStatus: {
+        type: String,
+        enum: ["pending", "completed", "failed"],
+        default: "pending"
     }
 
 },{

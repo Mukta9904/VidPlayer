@@ -1,4 +1,5 @@
-"use client"
+"use client";
+
 import React from 'react'
 import Navbar from '@/components/Navbar/page'
 import Sidebar from '@/components/Sidebar/page'
@@ -9,6 +10,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { userContext } from '@/context/context'
+import { useRouter } from 'next/navigation'
+import ReduxProvider from '@/components/ReduxProvider';
+
 interface User {
   fullName: string,
   avatar: string,
@@ -67,7 +71,7 @@ function convertSecondsToHMS(seconds: number): string {
 }
 
 const Homepage = () => {
-  
+  const router = useRouter()
   dayjs.extend(relativeTime);
   const [video , setVideo] = useState<Video[]>([])
   useEffect( () => {
@@ -77,19 +81,25 @@ const Homepage = () => {
   }   
   getData()
   }, [])
-  const [user, setUser] = useState<User | null>(null);
   
+  const playVideo  = (id: string) =>{
+    try {
+      router.push(`/play-video/${id}`) 
+    }catch (error) {
+      console.log("Error playing video", error);
+    }
+  }
   return (
-    <userContext.Provider value={{ user, setUser }}>
+    <ReduxProvider> 
     <div>
       <div className=' w-full h-20 backdrop-blur-md  border-b-[2px] border-gray-700'>
         <Navbar/>
       </div>
       <div className='flex '>
-        <Sidebar/>
+        <Sidebar opening={true}/>
         <div className='grid grid-cols-4 w-full ml-5 mt-5 gap-3 '>
            { Array.isArray(video) && video.map((video, index) =>(
-            <Card shadow="sm" className='max-h-64' key={index} isPressable onPress={() => console.log("video pressed")}>
+            <Card shadow="sm" className='max-h-64' key={index} isPressable onPress={() => playVideo(video.videoFile)}>
             <CardBody className="overflow-visible p-0 relative">
               <Image
                 shadow="sm"
@@ -122,12 +132,11 @@ const Homepage = () => {
             </CardFooter>
           </Card>
            ))
-
            }
         </div>
       </div>
     </div>
-    </userContext.Provider>
+  </ReduxProvider>
   )
 }
 

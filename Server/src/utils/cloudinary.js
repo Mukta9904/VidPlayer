@@ -33,6 +33,7 @@ const uploadOnCludinary = async function(localFilePath) {
         return null;
     }
 };
+
 const uploadVideoOnCludinary = async function(localFilePath) {
     try {
         if (!localFilePath) return null;
@@ -59,7 +60,6 @@ const uploadVideoOnCludinary = async function(localFilePath) {
         return null;
     }
 };
-
 
 const deleteFromCloudinary = async function(imageURL) {
     const publicId = (imageURL) => imageURL.split('/').pop().split('.')[0];
