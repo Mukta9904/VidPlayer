@@ -29,5 +29,5 @@ app.use("/api/v1/subscription", subscriptionRouter);
 app.use("/api/v1/playlist", playlistRouter);
 app.use("/api/v1/comment", commentRouter);
 app.use("/api/v1/like", likeRouter);
-app.use("/api/v1/note", noteRouter);
+app.use("/api/v1/notes", noteRouter);
 export {app}

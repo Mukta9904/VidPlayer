@@ -9,6 +9,8 @@ const toggleSubscription = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
 
   const userId = req.user?._id;
+  // console.log(userId);
+  
   // TODO: toggle subscription
 
   if (!channelId) throw new ApiError(500, "ChannelId is missing");
@@ -24,6 +26,8 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     await Subscription.deleteOne({
       _id: existingSubscription._id,
     });
+    console.log("Subscription toggeled successfully");
+    
     return res.status(200).json({
       success: true,
       subscribed: false,
@@ -54,8 +58,6 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   if (!userId)
     throw new ApiError(401, "Unauthorized request: userId is missing");
 
-  if ((await userId.toString()) !== channelId)
-    throw new ApiError(401, "Unauthorized request");
   const subscribers = await User.aggregate([
     {
       $match: { _id: new mongoose.Types.ObjectId(channelId) },
@@ -110,8 +112,6 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 const getSubscribedChannels = asyncHandler(async (req, res) => {
   const { subscriberId } = req.params;
   const userId = req.user?._id;
-  console.log(userId);
-  console.log(subscriberId);
   if (!subscriberId) throw new ApiError(500, "SubscriberId is missing");
   if (!userId)
     throw new ApiError(401, "Unauthorized request: userId is missing");

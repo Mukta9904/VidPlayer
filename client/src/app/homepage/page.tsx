@@ -4,6 +4,9 @@ import React from 'react'
 import Navbar from '@/components/Navbar/page'
 import Sidebar from '@/components/Sidebar/page'
 import { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '@/app/store';
+import { setPlayedVideo } from '../slices/videoSlice';
 import axios from 'axios'
 import {Card, CardBody, CardFooter, Image} from "@nextui-org/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -71,6 +74,7 @@ function convertSecondsToHMS(seconds: number): string {
 }
 
 const Homepage = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter()
   dayjs.extend(relativeTime);
   const [video , setVideo] = useState<Video[]>([])
@@ -82,15 +86,32 @@ const Homepage = () => {
   getData()
   }, [])
   
-  const playVideo  = (id: string) =>{
+  const playVideo  = async (video: Video) =>{
     try {
-      router.push(`/play-video/${id}`) 
+      const id = video.videoFile
+      dispatch(setPlayedVideo(video));
+      localStorage.setItem("playedVideoOwnerId", video?.owner?._id);
+      localStorage.setItem("playedVideoId", video?._id);
+      const token = localStorage.getItem("token");
+      if(token){
+        const videoId = video?._id
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/videos/${videoId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        ).then(()=> router.push(`/play-video/${id}`)).catch(err => console.log(err));
+      } else {
+        router.push("/login")
+      }
     }catch (error) {
       console.log("Error playing video", error);
-    }
+    } 
+     
   }
   return (
-    <ReduxProvider> 
+
     <div>
       <div className=' w-full h-20 backdrop-blur-md  border-b-[2px] border-gray-700'>
         <Navbar/>
@@ -99,7 +120,7 @@ const Homepage = () => {
         <Sidebar opening={true}/>
         <div className='grid grid-cols-4 w-full ml-5 mt-5 gap-3 '>
            { Array.isArray(video) && video.map((video, index) =>(
-            <Card shadow="sm" className='max-h-64' key={index} isPressable onPress={() => playVideo(video.videoFile)}>
+            <Card shadow="sm" className='max-h-64' key={index} isPressable onPress={() => playVideo(video)}>
             <CardBody className="overflow-visible p-0 relative">
               <Image
                 shadow="sm"
@@ -136,7 +157,7 @@ const Homepage = () => {
         </div>
       </div>
     </div>
-  </ReduxProvider>
+
   )
 }
 

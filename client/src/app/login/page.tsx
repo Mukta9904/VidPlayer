@@ -59,7 +59,7 @@ const LoginForm: React.FC = () => {
         //   coverImage: data.coverImage,
         // });
         localStorage.setItem("token", data.accessToken);
-        router.push("/homepage");
+        router.push("/");
       }
     } catch (error) {
       console.log(error);

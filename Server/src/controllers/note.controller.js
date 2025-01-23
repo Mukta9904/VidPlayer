@@ -5,25 +5,52 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 
 const saveNote = asyncHandler(async (req, res) => {
-    const userId = req.user?._id;
-    const {content} = req.body;
-    console.log(content);
-    const videoId = req.params?.videoId;
-    if (!userId) throw new ApiError(401, "Unauthorized request");
-    if (!content) throw new ApiError(400, "Note content is missing");
-    if (!videoId) throw new ApiError(500, "VideoId is missing");
-
-    const savedNote = await Note.create({
-        video: videoId,
-        owner: userId,
-        content,
-    });
-
-    if (!savedNote)
-        throw new ApiError(500, "Something went wrong when saving the note");
-    return res
-        .status(200)
-        .json(new ApiResponse(200, savedNote, "Note Saved Successfully"));
+    try {
+        const userId = req.user?._id;
+        const {content} = req.body;
+        console.log(content);
+        const videoId = req.params?.videoId;
+        if (!userId) throw new ApiError(401, "Unauthorized request");
+        if (!content) throw new ApiError(400, "Note content is missing");
+        if (!videoId) throw new ApiError(500, "VideoId is missing");
+    
+        const savedNote = await Note.findOneAndUpdate(
+            {
+                video: videoId,
+                owner: userId,
+            },
+            {
+                $set: {
+                    content,
+                },
+            },{new: true}
+        );
+        console.log(savedNote);
+        if (savedNote) {
+            if (savedNote.content !== content) {
+              savedNote.content = content;
+              await savedNote.save();
+              console.log(savedNote);
+            }
+        }
+        else{
+            const newNote = await Note.create({
+                video: videoId,
+                owner: userId,
+                content,
+            })
+            if (!newNote)
+            throw new ApiError(500, "Something went wrong while saving the note");
+            return res
+            .status(200)
+            .json(new ApiResponse(200, newNote , "Note Saved Successfully"));
+        }
+        return res
+            .status(200)
+            .json(new ApiResponse(200, savedNote , "Note Saved Successfully"));
+    } catch (error) {
+        return res.status(500).json(new ApiError(500, "Something went wrong while saving note"));
+    }
 });
 
 const getNote = asyncHandler(async (req, res) => {
@@ -35,7 +62,6 @@ const getNote = asyncHandler(async (req, res) => {
     const note = await Note.findOne(
         {
             video: videoId,
-            owner: userId,
         },
     );
     if (!note)
