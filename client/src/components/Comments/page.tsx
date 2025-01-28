@@ -2,7 +2,7 @@ import React from 'react'
 
 const Comments = () => {
   return (
-    <div>
+    <div className='w-full h-full'>
       The Comments tab 
     </div>
   )

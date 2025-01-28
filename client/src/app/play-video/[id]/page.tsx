@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import VideoPlayer from '@/components/VideoPlayer/page'
 import Navbar from '@/components/Navbar/page'
-import Channel from '@/components/Channel/page'
-import Comments from '@/components/Comments/page'
-import Suggestion from '@/components/Suggestion/page'
-import NotesEditor from '@/components/Notepad/page'
+const Channel = dynamic(() => import("@/components/Channel/page"), { ssr: false });
+const Comments = dynamic(() => import("@/components/Comments/page"), { ssr: false });
+const Suggestion = dynamic(() => import("@/components/Suggestion/page"), { ssr: false });
+const NotesEditor = dynamic(() => import("@/components/Notepad/page"), { ssr: false });
 import ReduxProvider from '@/components/ReduxProvider'
 import Sidebar from '@/components/Sidebar/page'
+import { log } from 'console'
+import dynamic from 'next/dynamic'
 
 const page = () => {
     const {id} = useParams<{id: string}>();
@@ -18,8 +20,9 @@ const page = () => {
       async function addViews() {
         try {
           const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/videos/${id}`);
-        } catch (error) {
           
+        } catch (error) {
+          console.log(error);
         }
       }
       
@@ -29,13 +32,15 @@ const page = () => {
     <div className='w-full h-full'>
       <Navbar/>
       <div className='flex w-full h-full'>
-        <Sidebar opening={false}/>
-        <div className='flex-col gap-3 h-screen'>
+        <Sidebar/>
+        <div className='max-w-[750px] pl-3 flex flex-col items-center justify-center ml-20 gap-3 h-full'>
+          <div className='shadow-xl m-4 w-full shadow-gray-600 rounded-xl overflow-hidden'>
         <VideoPlayer videoFile={id} />
+          </div>
         <Channel/>
         <Comments/>
         </div>
-      <div className=' flex-col gap-3 h-screen'>
+      <div className='mx-auto flex-col items-center justify-center gap-3 h-screen'>
         <div className='w-full'>
        <NotesEditor/> 
         </div>

@@ -7,7 +7,7 @@ interface PlayerProps {
 const VideoPlayer:React.FC<PlayerProps> = ({videoFile}) => {
     
   return (
-    <div className='w-[800px] p-4 rounded-xl'>
+    <div className='w-full'>
       <HLSPlayer videoSrc={`http://localhost:8000/uploads/courses/${videoFile}/master.m3u8`} />
     </div>
   )

@@ -41,7 +41,7 @@ const Navbar: React.FC = () => {
   return (
 
 
-    <div className="w-full h-20 backdrop-blur-md  border-b-[2px] border-gray-700 px-6 flex items-center justify-between">
+    <div className="w-full sticky top-0 h-20 backdrop-blur-md z-10  border-b-[2px] border-gray-700 px-6 flex items-center justify-between">
       <div className="flex justify-center items-center gap-3">
         <img
           src="/assets/logo3.png"

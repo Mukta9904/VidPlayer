@@ -12,6 +12,8 @@ import {Card, CardBody, CardFooter, Image} from "@nextui-org/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { formatViews } from '@/lib/utils';
+import { convertSecondsToHMS } from '@/lib/utils';
 import { userContext } from '@/context/context'
 import { useRouter } from 'next/navigation'
 import ReduxProvider from '@/components/ReduxProvider';
@@ -43,35 +45,7 @@ interface Video {
   duration: number,
   isPublished: boolean
 }
-const formatViews = (views: number): string => {
-  if (views >= 1000000) {
-    return (views / 1000000).toFixed(1) + 'M views';
-  } else if (views >= 1000) {
-    return (views / 1000).toFixed(1) + 'K views';
-  } else {
-    return views + ' views';
-  }
-}
-function convertSecondsToHMS(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = Math.floor(seconds % 60); // Remove fractional part
 
-  let result = '';
-
-  // Include hours only if greater than zero
-  if (hours > 0) {
-      result += `${hours.toString().padStart(2, '0')}:`;
-  }
-
-  // Always include minutes
-  result += `${minutes.toString().padStart(2, '0')}:`;
-
-  // Ensure two digits for seconds
-  result += remainingSeconds.toString().padStart(2, '0');
-
-  return result;
-}
 
 const Homepage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -92,6 +66,7 @@ const Homepage = () => {
       dispatch(setPlayedVideo(video));
       localStorage.setItem("playedVideoOwnerId", video?.owner?._id);
       localStorage.setItem("playedVideoId", video?._id);
+      localStorage.setItem("video", JSON.stringify(video));
       const token = localStorage.getItem("token");
       if(token){
         const videoId = video?._id
@@ -117,8 +92,8 @@ const Homepage = () => {
         <Navbar/>
       </div>
       <div className='flex '>
-        <Sidebar opening={true}/>
-        <div className='grid grid-cols-4 w-full ml-5 mt-5 gap-3 '>
+        <Sidebar/>
+        <div className='grid grid-cols-4 px-5 w-full ml-20 mt-5 gap-3 '>
            { Array.isArray(video) && video.map((video, index) =>(
             <Card shadow="sm" className='max-h-64' key={index} isPressable onPress={() => playVideo(video)}>
             <CardBody className="overflow-visible p-0 relative">

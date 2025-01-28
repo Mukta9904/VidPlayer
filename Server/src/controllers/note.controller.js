@@ -3,34 +3,26 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Note } from "../models/note.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-
 const saveNote = asyncHandler(async (req, res) => {
     try {
         const userId = req.user?._id;
         const {content} = req.body;
-        console.log(content);
+
         const videoId = req.params?.videoId;
         if (!userId) throw new ApiError(401, "Unauthorized request");
         if (!content) throw new ApiError(400, "Note content is missing");
         if (!videoId) throw new ApiError(500, "VideoId is missing");
-    
-        const savedNote = await Note.findOneAndUpdate(
+        
+        const savedNote = await Note.findOne(
             {
                 video: videoId,
                 owner: userId,
-            },
-            {
-                $set: {
-                    content,
-                },
-            },{new: true}
+            }
         );
-        console.log(savedNote);
         if (savedNote) {
             if (savedNote.content !== content) {
               savedNote.content = content;
               await savedNote.save();
-              console.log(savedNote);
             }
         }
         else{
@@ -38,7 +30,9 @@ const saveNote = asyncHandler(async (req, res) => {
                 video: videoId,
                 owner: userId,
                 content,
-            })
+            }, {new: true});
+
+            
             if (!newNote)
             throw new ApiError(500, "Something went wrong while saving the note");
             return res
@@ -58,12 +52,14 @@ const getNote = asyncHandler(async (req, res) => {
     const videoId = req.params?.videoId;
     if (!userId) throw new ApiError(401, "Unauthorized request");
     if (!videoId) throw new ApiError(500, "VideoId is missing");
-
+    
     const note = await Note.findOne(
         {
             video: videoId,
+            owner: userId,
         },
     );
+    
     if (!note)
         throw new ApiError(500, "Something went wrong when getting the note");
     return res

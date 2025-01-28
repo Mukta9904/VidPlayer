@@ -175,14 +175,14 @@ const getLikedVideos = asyncHandler(async (req, res) => {
             },
         },
     ]);
-
-    if (!likedVideos?.length) throw new ApiError(404, "No liked videos found");
+    
+    // if (!likedVideos?.length) throw new ApiError(404, "No liked videos found");
     return res
         .status(200)
         .json(
             new ApiResponse(
                 200,
-                likedVideos,
+                likedVideos || [],
                 "All Liked Videos Found Successfully"
             )
         );
@@ -215,13 +215,13 @@ const getVideoLikes = asyncHandler(async (req, res) => {
         },
     ]);
 
-    if (!likes?.length) throw new ApiError(404, "likes can't be found");
     return res
         .status(200)
         .json(
-            new ApiResponse(200, likes[0]?.likes, "Liked Found Successfully")
+            new ApiResponse(200, likes[0]?.likes || 0, "Liked Found Successfully")
         );
 });
+
 const getCommentLikes = asyncHandler(async (req, res) => {
     //TODO: get all liked videos
     const { commentId } = req.params;

@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { HomeIcon, ClockIcon, FolderIcon, HeartIcon, UserIcon, Bars3Icon } from '@heroicons/react/24/outline';
 
-const Sidebar = ({ opening }: { opening: boolean }) => {
-  const [isOpen, setIsOpen] = useState(opening || false);
+const Sidebar = () => {
+  const [isOpen, setIsOpen] = useState( false);
   const pathname = usePathname();
 
   const toggleSidebar = () => {
@@ -16,7 +16,7 @@ const Sidebar = ({ opening }: { opening: boolean }) => {
   const isActive = (path: string ) => pathname === path;
 
   return (
-    <div className={`flex flex-col h-[calc(100vh-80px)] pl-6 p-3 bg-black  text-white ${isOpen ? 'w-56' : 'w-20'} transition-width duration-300`}>
+    <div className={`flex flex-col shadow-xl shadow-gray-900 fixed top-[80px] left-0 z-30 h-[calc(100vh-80px)] pl-6 p-3 bg-black  text-white ${isOpen ? 'w-56' : 'w-20'} transition-width duration-300`}>
       <button onClick={toggleSidebar} className="mb-4 flex justify-start items-center p-2 rounded-lg hover:border-[1px] box-border hover:border-gray-500 hover:bg-gray-900 w-12 pl-[8px]">
         <Bars3Icon className="w-8  " />
       </button>
