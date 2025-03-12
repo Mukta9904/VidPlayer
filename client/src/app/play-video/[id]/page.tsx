@@ -40,7 +40,7 @@ const page = () => {
         <Channel/>
         <Comments/>
         </div>
-      <div className='mx-auto flex-col items-center justify-center gap-3 h-screen'>
+      <div className='mx-auto h-full flex-col items-center justify-center gap-3'>
         <div className='w-full'>
        <NotesEditor/> 
         </div>

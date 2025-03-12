@@ -84,10 +84,7 @@ const NotesEditor: React.FC = () => {
         plugins: [
           
           // Core editing features
-          'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
-          // Your account includes a free trial of TinyMCE premium features
-          // Try the most popular premium features until Feb 5, 2025:
-          'checklist', 'mediaembed', 'casechange', 'export', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'editimage', 'advtemplate', 'mentions',  'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown','importword', 'exportword', 'exportpdf'
+          'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount'
         ],
         toolbar: 'undo redo | bold italic underline strikethrough | textcolor | alignleft aligncenter alignright alignjustify | numlist bullist ',
       }}

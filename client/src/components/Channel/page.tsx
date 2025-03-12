@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { convertSecondsToHMS } from "@/lib/utils";
 import { formatViews } from "@/lib/utils";
-
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 const Channel = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -261,13 +261,10 @@ const Channel = () => {
       {user && (
         <div className="flex justify-between w-full max-w-4xl border-2 rounded-2xl border-gray-200 p-5 mb-5">
           <div className="flex items-center">
-            <Image
-              src={user?.avatar}
-              alt={`${user?.username}'s avatar`}
-              width={70}
-              height={700}
-              className="rounded-full mr-3"
-            />
+          <Avatar className="h-14 w-16 mx-3">
+          <AvatarImage src={user?.avatar} />
+          <AvatarFallback>{user?.username}</AvatarFallback>
+        </Avatar>
             <div className="flex flex-col">
               <h1 className="text-2xl font-bold">{user?.username}</h1>
               <p className="text-gray-600">{subscribers} subscribers</p>

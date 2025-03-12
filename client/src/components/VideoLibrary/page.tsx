@@ -10,6 +10,7 @@ import { RootState, AppDispatch } from '@/app/store';
 import { setPlayedVideo } from '@/app/slices/videoSlice';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
 interface Owner{
   fullname: string,
@@ -99,13 +100,10 @@ const VideoLibrary = ({ videos, currentVideoId }:{ videos: Video[], currentVideo
                 : video.description}
             </p>
             <div className="flex items-center mt-2 space-x-2">
-              <Image
-                src={video.owner.avatar}
-                alt={video.owner.username}
-                width={24}
-                height={24}
-                className="rounded-full"
-              />
+            <Avatar className="h-7 w-7">
+          <AvatarImage src={video?.owner?.avatar} />
+          <AvatarFallback>{video?.owner?.username}</AvatarFallback>
+        </Avatar>
               <span className="text-sm font-medium text-gray-300">
                 {video.owner.username}
               </span>
