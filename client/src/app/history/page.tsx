@@ -5,28 +5,33 @@ import { Card, CardBody, CardFooter, Image } from "@nextui-org/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { setPlayedVideo } from "../slices/videoSlice";
+import { AppDispatch } from "@/app/store";
 
-interface Video {
-  _id: string;
-  videoFile: string;
-  thumbNail: string;
-  title: string;
-  views: number;
-  createdAt: string;
-  updatedAt: string;
-  duration: number;
-  description: string;
-  owner: {
-    _id: string;
-    username: string;
-    fullName: string;
-    avatar: string;
-  };
-  isPublished: boolean;
-  __v: number;
-}
+  interface Owner{
+    fullname: string,
+    avatar: string,
+    username: string,
+    _id: string
+  }
+  interface Video {
+    createdAt: string,
+    title: string,
+    description: string,
+    videoFile: string,
+    thumbNail: string,
+    _id: string,
+    owner: Owner,
+    views: number,
+    duration: number,
+    isPublished: boolean
+  }
 
 const HistoryPage: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
     dayjs.extend(relativeTime);
   const [videos, setVideos] = useState<Video[]>([]);
   const formatViews = (views: number): string => {
@@ -57,6 +62,23 @@ const HistoryPage: React.FC = () => {
     result += remainingSeconds.toString().padStart(2, '0');
   
     return result;
+  }
+  function playVideo(video: Video) {
+    try {
+      const id = video.videoFile;
+      const token = localStorage.getItem("token");
+      if(token){
+        dispatch(setPlayedVideo(video));
+      localStorage.setItem("playedVideoOwnerId", video?.owner?._id);
+      localStorage.setItem("playedVideoId", video?._id);
+      localStorage.setItem("video", JSON.stringify(video));
+        router.push(`/play-video/${id}`)
+      } else {
+        router.push("/login")
+      }
+    }catch (error) {
+      console.log("Error playing video", error);
+    } 
   }
   useEffect(() => {
     const fetchHistory = async () => {
@@ -93,7 +115,7 @@ const HistoryPage: React.FC = () => {
               className="max-h-64 my-5 w-full flex flex-row "
               key={index}
               isPressable
-              onPress={() => console.log("video pressed")}
+              onPress={() => playVideo(video)}
             >
               <CardBody className="overflow-visible p-0 w-[400px] relative">
                 <Image

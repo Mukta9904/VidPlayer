@@ -2,7 +2,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Video } from "../models/video.model.js";
-import { getVideoDurationInSeconds} from "get-video-duration";
+import mongoose from "mongoose";
+import { getVideoDurationInSeconds } from "get-video-duration";
 import {
     deleteFromCloudinary,
     uploadOnCludinary,
@@ -96,21 +97,37 @@ const publishAVideo = asyncHandler(async (req, res) => {
     // const videoFile = await uploadVideoOnCludinary(videoLocalPath);
     const uploadPath = path.resolve(videoLocalPath);
 
-    if(!uploadPath) throw new ApiError(500, "Something went wrong while uploading the video");
+    if (!uploadPath)
+        throw new ApiError(
+            500,
+            "Something went wrong while uploading the video"
+        );
     // Upload the video into uploader
-    const uploaderResponse = await axios.post(`${process.env.UPLOAD_SERVER_URI}`, {
-        videoPath: uploadPath});
-    if(!uploaderResponse) throw new ApiError(500, "Something went wrong while uploading the video");
+    const uploaderResponse = await axios.post(
+        `${process.env.UPLOAD_SERVER_URI}`,
+        {
+            videoPath: uploadPath,
+        }
+    );
+    if (!uploaderResponse)
+        throw new ApiError(
+            500,
+            "Something went wrong while uploading the video"
+        );
 
-    const {lessonId} = uploaderResponse.data; 
+    const { lessonId } = uploaderResponse.data;
 
-    if(!lessonId) throw new ApiError(500, "Something went wrong while uploading the video no job started");
-    
+    if (!lessonId)
+        throw new ApiError(
+            500,
+            "Something went wrong while uploading the video no job started"
+        );
+
     const duration = await getVideoDurationInSeconds(videoLocalPath);
 
     const thumbnail = await uploadOnCludinary(thumbnailLocalPath);
 
-    if ( !thumbnail) {
+    if (!thumbnail) {
         throw new ApiError(
             500,
             "Something went wrong while uploading on Cloudinary"
@@ -143,20 +160,32 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
-    if(req.user?._id){
-        const user = await User.findOne({_id: req.user?._id});
-        if(user){
-            console.log(user.watchHistory);
-            if(!user.watchHistory.includes(videoId)) user.watchHistory?.push(videoId);
-            await user.save({validateBeforeSave: false});
+    console.log("Requested videoId:", videoId);
+
+    if (!videoId) throw new ApiError(500, "Video Id is missing");
+
+    const video = await Video.findOne({ videoFile: videoId });
+
+    if (!video) throw new ApiError(404, "Video not found");
+
+    // Update user's watch history with the video's MongoDB _id
+    if (req.user?._id) {
+        const user = await User.findOne({ _id: req.user?._id });
+        if (user) {
+            // Check if video._id is already in watchHistory
+            if (
+                !user.watchHistory.some(
+                    (id) => id.toString() === video._id.toString()
+                )
+            ) {
+                user.watchHistory.push(video._id);
+                video.views = video.views + 1;
+                await user.save({ validateBeforeSave: false });
+                console.log("Updated watch history");
+            }
         }
     }
-    
-    //TODO: get video by id
-    if (!videoId) throw new ApiError(500, "Video Id is missing");
-    const video = await Video.findById(videoId);
-    video.views = video.views + 1;
-    await video.save({ validateBeforeSave: false });
+
     return res
         .status(200)
         .json(new ApiResponse(200, video, "Video Successfully fetched"));
@@ -232,14 +261,13 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
             {
                 $set: {
                     isPublished: {
-                        $eq: [false, "$isPublished"]
-                    }
-                }
-            }
+                        $eq: [false, "$isPublished"],
+                    },
+                },
+            },
         ],
         { new: true }
     );
-
 
     if (!video) throw new ApiError(404, "Not found");
 

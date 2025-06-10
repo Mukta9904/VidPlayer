@@ -89,7 +89,6 @@ const NotesEditor: React.FC = () => {
         toolbar: 'undo redo | bold italic underline strikethrough | textcolor | alignleft aligncenter alignright alignjustify | numlist bullist ',
       }}
       />
-      {isSaving && <p>Saving...</p>}
       </div>
   );
 };

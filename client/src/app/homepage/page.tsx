@@ -62,21 +62,14 @@ const Homepage = () => {
   
   const playVideo  = async (video: Video) =>{
     try {
-      const id = video.videoFile
-      dispatch(setPlayedVideo(video));
+      const id = video.videoFile;
+      const token = localStorage.getItem("token");
+      if(token){
+        dispatch(setPlayedVideo(video));
       localStorage.setItem("playedVideoOwnerId", video?.owner?._id);
       localStorage.setItem("playedVideoId", video?._id);
       localStorage.setItem("video", JSON.stringify(video));
-      const token = localStorage.getItem("token");
-      if(token){
-        const videoId = video?._id
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/videos/${videoId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        ).then(()=> router.push(`/play-video/${id}`)).catch(err => console.log(err));
+        router.push(`/play-video/${id}`)
       } else {
         router.push("/login")
       }

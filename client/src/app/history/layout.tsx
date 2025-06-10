@@ -1,9 +1,14 @@
+"use client"
 import React from 'react';
 import Navbar from '@/components/Navbar/page';
 import Sidebar from '@/components/Sidebar/page';
+import { Provider } from "react-redux";
+import { store } from '../store';
 const Layout = ({ children }: { children: React.ReactNode }) => {
     return (
+        <Provider store={store}> 
         <div className='flex'>
+            
             <Sidebar />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <Navbar />
@@ -12,6 +17,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 </div>
             </div>
         </div>
+    </Provider>
     );
 };
 
